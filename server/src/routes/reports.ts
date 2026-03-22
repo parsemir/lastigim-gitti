@@ -125,7 +125,11 @@ router.post('/', authenticate, upload.single('photo'), async (req: AuthRequest, 
       return res.status(400).json({ error: 'Valid coordinates required' });
     }
 
-    const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    let photoUrl: string | null = null;
+    if (req.file) {
+      const base64 = req.file.buffer.toString('base64');
+      photoUrl = `data:${req.file.mimetype};base64,${base64}`;
+    }
 
     const report = await prisma.report.create({
       data: {
