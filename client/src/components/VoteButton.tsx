@@ -11,13 +11,13 @@ export default function VoteButton({ reportId, voteScore, userVote, onVote }: Pr
   const { t } = useLanguage();
 
   return (
-    <div className="inline-flex items-center bg-gray-50 rounded-xl">
+    <div className="flex items-center gap-2">
       <button
         onClick={() => onVote(reportId, 1)}
-        className={`p-2 rounded-l-xl transition-all duration-200 active:scale-90 ${
+        className={`p-1 rounded transition ${
           userVote === 1
-            ? 'text-accent-500 bg-orange-100'
-            : 'text-gray-400 hover:text-accent-500 hover:bg-orange-50'
+            ? 'text-accent-500 bg-orange-50'
+            : 'text-gray-400 hover:text-accent-500'
         }`}
         title={t('upvote')}
       >
@@ -25,17 +25,17 @@ export default function VoteButton({ reportId, voteScore, userVote, onVote }: Pr
           <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
         </svg>
       </button>
-      <span className={`font-bold text-sm min-w-[32px] text-center px-1 ${
+      <span className={`font-bold text-sm min-w-[20px] text-center ${
         voteScore > 0 ? 'text-accent-500' : voteScore < 0 ? 'text-red-500' : 'text-gray-500'
       }`}>
         {voteScore}
       </span>
       <button
         onClick={() => onVote(reportId, -1)}
-        className={`p-2 rounded-r-xl transition-all duration-200 active:scale-90 ${
+        className={`p-1 rounded transition ${
           userVote === -1
-            ? 'text-blue-500 bg-blue-100'
-            : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'
+            ? 'text-blue-500 bg-blue-50'
+            : 'text-gray-400 hover:text-blue-500'
         }`}
         title={t('downvote')}
       >

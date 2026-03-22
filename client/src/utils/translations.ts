@@ -117,8 +117,6 @@ const translations = {
   rememberPassword: { en: 'Remember your password?', tr: 'Şifrenizi hatırlıyor musunuz?' },
   tryDifferentEmail: { en: '← Try a different email', tr: '← Farklı bir e-posta deneyin' },
   somethingWentWrong: { en: 'Something went wrong', tr: 'Bir hata oluştu' },
-  loading: { en: 'Loading...', tr: 'Yükleniyor...' },
-
   // Time ago
   justNow: { en: 'just now', tr: 'az önce' },
   mAgo: { en: 'm ago', tr: 'dk önce' },
