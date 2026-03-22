@@ -104,7 +104,8 @@ const translations = {
   forgotPasswordDescription: { en: 'Enter your email and we\'ll send you a reset code.', tr: 'E-postanızı girin, size sıfırlama kodu gönderelim.' },
   sendResetCode: { en: 'Send Reset Code', tr: 'Sıfırlama Kodu Gönder' },
   sending: { en: 'Sending...', tr: 'Gönderiliyor...' },
-  resetCodeSent: { en: 'A reset code has been sent! Check below.', tr: 'Sıfırlama kodu gönderildi! Aşağıya bakın.' },
+  resetCodeSent: { en: 'A reset code has been sent to your email.', tr: 'Sıfırlama kodu e-postanıza gönderildi.' },
+  checkEmailForCode: { en: 'Check your inbox (and spam folder) for the 6-digit code.', tr: 'Gelen kutunuzu (ve spam klasörünüzü) 6 haneli kod için kontrol edin.' },
   enterResetCode: { en: 'Enter Reset Code', tr: 'Sıfırlama Kodunu Girin' },
   resetCode: { en: 'Reset Code', tr: 'Sıfırlama Kodu' },
   newPassword: { en: 'New Password', tr: 'Yeni Şifre' },
@@ -116,9 +117,6 @@ const translations = {
   rememberPassword: { en: 'Remember your password?', tr: 'Şifrenizi hatırlıyor musunuz?' },
   tryDifferentEmail: { en: '← Try a different email', tr: '← Farklı bir e-posta deneyin' },
   somethingWentWrong: { en: 'Something went wrong', tr: 'Bir hata oluştu' },
-  demoResetCode: { en: 'Your reset code (demo)', tr: 'Sıfırlama kodunuz (demo)' },
-  demoResetNote: { en: 'In production, this would be sent to your email.', tr: 'Gerçek uygulamada bu kod e-postanıza gönderilir.' },
-
   // Time ago
   justNow: { en: 'just now', tr: 'az önce' },
   mAgo: { en: 'm ago', tr: 'dk önce' },

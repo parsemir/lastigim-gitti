@@ -2,8 +2,11 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { z } from 'zod';
+import { Resend } from 'resend';
 import { prisma } from '../index';
 import { authenticate, generateToken, AuthRequest } from '../middleware/auth';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const router = Router();
 
@@ -90,14 +93,26 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
       data: { resetToken, resetTokenExpiry },
     });
 
-    // In production, you would send this via email (SendGrid, Resend, etc.)
-    // For now, we log it and return it for demo purposes
-    console.log(`Password reset code for ${email}: ${resetToken}`);
+    // Send reset code via email
+    await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'Lastiğim Gitti <onboarding@resend.dev>',
+      to: email,
+      subject: 'Şifre Sıfırlama Kodu / Password Reset Code',
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+          <h2 style="color: #2563EB; margin-bottom: 16px;">Lastiğim Gitti</h2>
+          <p>Şifre sıfırlama kodunuz / Your password reset code:</p>
+          <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #1e40af;">${resetToken}</span>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">Bu kod 15 dakika içinde geçerliliğini yitirecektir.<br/>This code expires in 15 minutes.</p>
+          <p style="color: #9ca3af; font-size: 12px;">Bu e-postayı siz talep etmediyseniz, lütfen dikkate almayın.<br/>If you didn't request this, please ignore this email.</p>
+        </div>
+      `,
+    });
 
     res.json({
-      message: 'If an account with that email exists, a reset code has been generated.',
-      // Remove this line in production — only for demo:
-      resetCode: resetToken,
+      message: 'If an account with that email exists, a reset code has been sent.',
     });
   } catch (err) {
     console.error(err);

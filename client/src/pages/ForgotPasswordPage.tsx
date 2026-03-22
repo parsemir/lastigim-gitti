@@ -1,11 +1,10 @@
 import { useState, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../utils/api';
 
 export default function ForgotPasswordPage() {
   const { lang, setLang, t } = useLanguage();
-  const navigate = useNavigate();
 
   // Step 1: Enter email
   // Step 2: Enter reset code + new password
@@ -17,19 +16,14 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demoCode, setDemoCode] = useState('');
 
   const handleRequestCode = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email });
       setSuccess(t('resetCodeSent'));
-      // For demo: show the code (in production, this would be sent via email)
-      if (res.data.resetCode) {
-        setDemoCode(res.data.resetCode);
-      }
       setStep(2);
     } catch (err: any) {
       setError(err.response?.data?.error || t('somethingWentWrong'));
@@ -126,15 +120,9 @@ export default function ForgotPasswordPage() {
               <h2 className="text-xl font-semibold text-gray-800">{t('enterResetCode')}</h2>
 
               {success && (
-                <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg">{success}</div>
-              )}
-
-              {/* Demo notice - remove in production */}
-              {demoCode && (
-                <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm p-3 rounded-lg">
-                  <p className="font-semibold">{t('demoResetCode')}:</p>
-                  <p className="text-2xl font-bold tracking-widest text-center mt-1">{demoCode}</p>
-                  <p className="text-xs mt-1 text-blue-500">{t('demoResetNote')}</p>
+                <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg">
+                  <p>{success}</p>
+                  <p className="text-xs mt-1 text-green-600">{t('checkEmailForCode')}</p>
                 </div>
               )}
 
@@ -191,7 +179,7 @@ export default function ForgotPasswordPage() {
 
               <button
                 type="button"
-                onClick={() => { setStep(1); setError(''); setSuccess(''); setDemoCode(''); }}
+                onClick={() => { setStep(1); setError(''); setSuccess(''); }}
                 className="w-full text-sm text-gray-500 hover:text-gray-700"
               >
                 {t('tryDifferentEmail')}
