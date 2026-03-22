@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, useEffect, useCallback, FormEvent } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
@@ -53,8 +53,11 @@ export default function ReportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState('');
-  const [addressSearching, setAddressSearching] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [addressError, setAddressError] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const addressWrapperRef = useRef<HTMLDivElement>(null);
   const [nearbyReports, setNearbyReports] = useState<any[]>([]);
   const [duplicateDismissed, setDuplicateDismissed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -114,29 +117,58 @@ export default function ReportPage() {
     );
   };
 
-  const handleAddressSearch = async () => {
-    if (!address.trim()) return;
-    setAddressSearching(true);
-    setAddressError('');
+  const fetchSuggestions = useCallback(async (query: string) => {
+    if (query.trim().length < 3) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&viewbox=26.5,38.0,28.0,38.8&bounded=1`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&viewbox=26.5,38.0,28.0,38.8&bounded=1&accept-language=tr`
       );
       const data = await response.json();
-      if (data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
-        setAddress(data[0].display_name);
-        handleLocationSelect(lat, lng);
-      } else {
+      setAddressSuggestions(data);
+      setShowSuggestions(data.length > 0);
+      if (data.length === 0) {
         setAddressError(t('addressNotFound'));
+      } else {
+        setAddressError('');
       }
     } catch {
-      setAddressError(t('addressNotFound'));
-    } finally {
-      setAddressSearching(false);
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
     }
+  }, [t]);
+
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    setAddressError('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchSuggestions(value);
+    }, 400);
   };
+
+  const handleSuggestionClick = (suggestion: any) => {
+    const lat = parseFloat(suggestion.lat);
+    const lng = parseFloat(suggestion.lon);
+    setAddress(suggestion.display_name);
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+    handleLocationSelect(lat, lng);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (addressWrapperRef.current && !addressWrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -261,27 +293,42 @@ export default function ReportPage() {
             <p className="text-sm text-red-600 -mt-2">{locationError}</p>
           )}
 
-          {/* Address Input */}
-          <div>
+          {/* Address Input with Autocomplete */}
+          <div ref={addressWrapperRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('address')}</label>
-            <div className="flex gap-2">
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
               <input
                 type="text"
                 value={address}
-                onChange={(e) => { setAddress(e.target.value); setAddressError(''); }}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddressSearch(); } }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm"
+                onChange={(e) => handleAddressChange(e.target.value)}
+                onFocus={() => { if (addressSuggestions.length > 0) setShowSuggestions(true); }}
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm"
                 placeholder={t('addressPlaceholder')}
+                autoComplete="off"
               />
-              <button
-                type="button"
-                onClick={handleAddressSearch}
-                disabled={addressSearching || !address.trim()}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition disabled:opacity-50 text-sm whitespace-nowrap"
-              >
-                {addressSearching ? t('searching') : t('searchAddress')}
-              </button>
             </div>
+            {showSuggestions && addressSuggestions.length > 0 && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {addressSuggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleSuggestionClick(s)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-primary-50 transition text-sm text-gray-700 border-b border-gray-100 last:border-b-0 flex items-start gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span className="line-clamp-2">{s.display_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             {addressError && (
               <p className="text-sm text-red-600 mt-1">{addressError}</p>
             )}
