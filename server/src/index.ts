@@ -1,11 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { execSync } from 'child_process';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
 import reportRoutes from './routes/reports';
 import voteRoutes from './routes/votes';
 import adminRoutes from './routes/admin';
+
+// Sync database schema before anything else
+console.log('=== Lastiğim Gitti Startup ===');
+console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
+try {
+  console.log('Running prisma db push...');
+  execSync('npx prisma db push --accept-data-loss --schema=prisma/schema.prisma', {
+    stdio: 'inherit',
+    cwd: path.join(__dirname, '..'),
+  });
+  console.log('Database synced successfully!');
+} catch (err) {
+  console.error('prisma db push failed:', err);
+}
 
 export const prisma = new PrismaClient();
 
