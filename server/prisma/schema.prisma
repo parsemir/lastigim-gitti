@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("RESIDENT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+  votes   Vote[]
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  latitude    Float
+  longitude   Float
+  description String?
+  photoUrl    String?
+  status      String    @default("REPORTED")
+  adminNotes  String?
+  estimatedFixDate DateTime?
+  fixedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  votes Vote[]
+
+  @@index([latitude, longitude])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Vote {
+  id        String   @id @default(uuid())
+  value     Int      // 1 for upvote, -1 for downvote
+  createdAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reportId])
+}
