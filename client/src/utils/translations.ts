@@ -98,6 +98,27 @@ const translations = {
   deleteReport: { en: 'Delete', tr: 'Sil' },
   confirmDelete: { en: 'Are you sure you want to delete this report?', tr: 'Bu raporu silmek istediğinizden emin misiniz?' },
 
+  // Forgot / Reset password
+  forgotPassword: { en: 'Forgot password?', tr: 'Şifrenizi mi unuttunuz?' },
+  resetYourPassword: { en: 'Reset your password', tr: 'Şifrenizi sıfırlayın' },
+  forgotPasswordDescription: { en: 'Enter your email and we\'ll send you a reset code.', tr: 'E-postanızı girin, size sıfırlama kodu gönderelim.' },
+  sendResetCode: { en: 'Send Reset Code', tr: 'Sıfırlama Kodu Gönder' },
+  sending: { en: 'Sending...', tr: 'Gönderiliyor...' },
+  resetCodeSent: { en: 'A reset code has been sent! Check below.', tr: 'Sıfırlama kodu gönderildi! Aşağıya bakın.' },
+  enterResetCode: { en: 'Enter Reset Code', tr: 'Sıfırlama Kodunu Girin' },
+  resetCode: { en: 'Reset Code', tr: 'Sıfırlama Kodu' },
+  newPassword: { en: 'New Password', tr: 'Yeni Şifre' },
+  confirmPassword: { en: 'Confirm Password', tr: 'Şifreyi Onayla' },
+  confirmPasswordPlaceholder: { en: 'Re-enter your new password', tr: 'Yeni şifrenizi tekrar girin' },
+  resetPassword: { en: 'Reset Password', tr: 'Şifreyi Sıfırla' },
+  resetting: { en: 'Resetting...', tr: 'Sıfırlanıyor...' },
+  passwordsDoNotMatch: { en: 'Passwords do not match', tr: 'Şifreler eşleşmiyor' },
+  rememberPassword: { en: 'Remember your password?', tr: 'Şifrenizi hatırlıyor musunuz?' },
+  tryDifferentEmail: { en: '← Try a different email', tr: '← Farklı bir e-posta deneyin' },
+  somethingWentWrong: { en: 'Something went wrong', tr: 'Bir hata oluştu' },
+  demoResetCode: { en: 'Your reset code (demo)', tr: 'Sıfırlama kodunuz (demo)' },
+  demoResetNote: { en: 'In production, this would be sent to your email.', tr: 'Gerçek uygulamada bu kod e-postanıza gönderilir.' },
+
   // Time ago
   justNow: { en: 'just now', tr: 'az önce' },
   mAgo: { en: 'm ago', tr: 'dk önce' },

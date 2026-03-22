@@ -6,6 +6,7 @@ import MapPage from './pages/MapPage';
 import ReportPage from './pages/ReportPage';
 import FeedPage from './pages/FeedPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import Navbar from './components/Navbar';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     );
