@@ -7,8 +7,8 @@ cmds = ["npm install --include=dev"]
 [phases.build]
 cmds = [
   "cd client && npm run build",
-  "cd server && npx prisma generate && npx prisma migrate deploy && npm run build"
+  "cd server && npx prisma generate && npm run build"
 ]
 
 [start]
-cmd = "cd server && NODE_ENV=production node dist/index.js"
+cmd = "cd server && npx prisma db push --accept-data-loss && NODE_ENV=production node dist/index.js"
