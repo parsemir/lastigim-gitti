@@ -1,6 +1,9 @@
 {
-  "name": "lastигim-gitti",
+  "name": "lastigim-gitti",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
@@ -8,6 +11,7 @@
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "build": "cd client && npm run build && cd ../server && npm run build",
     "start": "cd server && NODE_ENV=production node dist/index.js",
+    "postinstall": "cd server && npm install && npx prisma generate && cd ../client && npm install",
     "db:migrate": "cd server && npx prisma migrate deploy",
     "db:seed": "cd server && npx prisma db seed"
   },
