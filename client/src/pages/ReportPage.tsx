@@ -1,5 +1,5 @@
 import { useState, useRef, FormEvent } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import api from '../utils/api';
@@ -29,12 +29,32 @@ function MapClickHandler({ onLocationSelect }: { onLocationSelect: (lat: number,
   return null;
 }
 
+function FlyToPosition({ position }: { position: [number, number] | null }) {
+  const map = useMap();
+  const lastFlown = useRef<string | null>(null);
+
+  if (position) {
+    const key = `${position[0]},${position[1]}`;
+    if (lastFlown.current !== key) {
+      lastFlown.current = key;
+      map.flyTo(position, 17, { duration: 1 });
+    }
+  }
+
+  return null;
+}
+
 export default function ReportPage() {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [description, setDescription] = useState('');
+  const [address, setAddress] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [addressSearching, setAddressSearching] = useState(false);
+  const [addressError, setAddressError] = useState('');
   const [nearbyReports, setNearbyReports] = useState<any[]>([]);
   const [duplicateDismissed, setDuplicateDismissed] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -43,7 +63,10 @@ export default function ReportPage() {
 
   const handleLocationSelect = async (lat: number, lng: number) => {
     setPosition([lat, lng]);
+    setLocationError('');
     setDuplicateDismissed(false);
+    // Reverse geocode to auto-fill address
+    reverseGeocode(lat, lng);
     try {
       const res = await api.get('/reports/nearby/check', { params: { lat, lng } });
       if (res.data.hasDuplicates) {
@@ -53,6 +76,65 @@ export default function ReportPage() {
       }
     } catch {
       setNearbyReports([]);
+    }
+  };
+
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=tr`
+      );
+      const data = await response.json();
+      if (data.display_name) {
+        setAddress(data.display_name);
+      }
+    } catch {
+      // Silently fail — address is optional
+    }
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError(t('locationError'));
+      return;
+    }
+    setLocating(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        handleLocationSelect(latitude, longitude);
+        setLocating(false);
+      },
+      () => {
+        setLocationError(t('locationError'));
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleAddressSearch = async () => {
+    if (!address.trim()) return;
+    setAddressSearching(true);
+    setAddressError('');
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&viewbox=26.5,38.0,28.0,38.8&bounded=1`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        setAddress(data[0].display_name);
+        handleLocationSelect(lat, lng);
+      } else {
+        setAddressError(t('addressNotFound'));
+      }
+    } catch {
+      setAddressError(t('addressNotFound'));
+    } finally {
+      setAddressSearching(false);
     }
   };
 
@@ -82,6 +164,7 @@ export default function ReportPage() {
       formData.append('latitude', position[0].toString());
       formData.append('longitude', position[1].toString());
       if (description) formData.append('description', description);
+      if (address) formData.append('address', address);
       if (photo) formData.append('photo', photo);
 
       await api.post('/reports', formData, {
@@ -108,6 +191,7 @@ export default function ReportPage() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapClickHandler onLocationSelect={handleLocationSelect} />
+          <FlyToPosition position={position} />
           {position && <Marker position={position} icon={pinIcon} />}
         </MapContainer>
       </div>
@@ -146,6 +230,61 @@ export default function ReportPage() {
                 </>
               )}
             </div>
+          </div>
+
+          {/* Use My Location Button */}
+          <button
+            type="button"
+            onClick={handleUseMyLocation}
+            disabled={locating}
+            className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-2.5 rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-60"
+          >
+            {locating ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {t('locating')}
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v2m0 16v2m10-10h-2M4 12H2" />
+                </svg>
+                {t('useMyLocation')}
+              </>
+            )}
+          </button>
+          {locationError && (
+            <p className="text-sm text-red-600 -mt-2">{locationError}</p>
+          )}
+
+          {/* Address Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('address')}</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => { setAddress(e.target.value); setAddressError(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddressSearch(); } }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm"
+                placeholder={t('addressPlaceholder')}
+              />
+              <button
+                type="button"
+                onClick={handleAddressSearch}
+                disabled={addressSearching || !address.trim()}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition disabled:opacity-50 text-sm whitespace-nowrap"
+              >
+                {addressSearching ? t('searching') : t('searchAddress')}
+              </button>
+            </div>
+            {addressError && (
+              <p className="text-sm text-red-600 mt-1">{addressError}</p>
+            )}
           </div>
 
           {/* Photo Upload */}

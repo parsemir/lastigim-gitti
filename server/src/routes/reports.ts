@@ -38,6 +38,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
         latitude: r.latitude,
         longitude: r.longitude,
         description: r.description,
+        address: r.address,
         photoUrl: r.photoUrl,
         status: r.status,
         createdAt: r.createdAt,
@@ -117,7 +118,7 @@ router.get('/nearby/check', authenticate, async (req: AuthRequest, res: Response
 // Create report
 router.post('/', authenticate, upload.single('photo'), async (req: AuthRequest, res: Response) => {
   try {
-    const { latitude, longitude, description } = req.body;
+    const { latitude, longitude, description, address } = req.body;
     const lat = parseFloat(latitude);
     const lng = parseFloat(longitude);
 
@@ -136,6 +137,7 @@ router.post('/', authenticate, upload.single('photo'), async (req: AuthRequest, 
         latitude: lat,
         longitude: lng,
         description: description || null,
+        address: address || null,
         photoUrl,
         userId: req.userId!,
       },

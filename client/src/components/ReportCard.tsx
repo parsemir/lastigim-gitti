@@ -58,6 +58,14 @@ export default function ReportCard({ report, userVote, onVote, onDelete }: Props
             <p className="text-sm text-gray-700 line-clamp-2">
               {report.description || t('noDescriptionProvided')}
             </p>
+            {report.address && (
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span className="line-clamp-1">{report.address}</span>
+              </p>
+            )}
             <p className="text-xs text-gray-400 mt-1">{t('by')} {report.user.name}</p>
           </div>
           <div className="mt-2">

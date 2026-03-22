@@ -22,21 +22,23 @@ export default function Navbar() {
             {t('appName')}
           </Link>
 
-          <div className="flex items-center gap-1">
-            <Link to="/" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/')}`}>
-              {t('map')}
-            </Link>
-            <Link to="/feed" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/feed')}`}>
-              {t('feed')}
-            </Link>
-            <Link to="/report" className={`px-3 py-1.5 rounded-md text-sm font-medium transition bg-accent-500 hover:bg-accent-600 text-white`}>
-              {t('report')}
-            </Link>
-            {user?.role === 'ADMIN' && (
-              <Link to="/admin" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/admin')}`}>
-                {t('admin')}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <Link to="/" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/')}`}>
+                {t('map')}
               </Link>
-            )}
+              <Link to="/feed" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/feed')}`}>
+                {t('feed')}
+              </Link>
+              <Link to="/report" className={`px-3 py-1.5 rounded-md text-sm font-medium transition bg-accent-500 hover:bg-accent-600 text-white`}>
+                {t('report')}
+              </Link>
+              {user?.role === 'ADMIN' && (
+                <Link to="/admin" className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${isActive('/admin')}`}>
+                  {t('admin')}
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

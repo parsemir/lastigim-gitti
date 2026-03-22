@@ -61,6 +61,14 @@ export default function MapMarkers({ reports, userVotes, onVote, onDelete }: Pro
                 <p className="text-sm text-gray-700 mb-1">
                   {report.description || t('noDescription')}
                 </p>
+                {report.address && (
+                  <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span className="line-clamp-2">{report.address}</span>
+                  </p>
+                )}
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${config.bgColor} ${config.color} font-medium`}>
                     {config.label[lang]}

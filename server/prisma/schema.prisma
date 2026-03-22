@@ -27,6 +27,7 @@ model Report {
   latitude    Float
   longitude   Float
   description String?
+  address     String?
   photoUrl    String?
   status      String    @default("REPORTED")
   adminNotes  String?
