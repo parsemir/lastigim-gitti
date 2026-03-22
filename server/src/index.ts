@@ -22,7 +22,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Same resolved path as upload middleware — server/uploads/
+const uploadsPath = path.resolve(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 
 // API routes
 app.use('/api/auth', authRoutes);
