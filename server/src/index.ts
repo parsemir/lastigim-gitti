@@ -43,6 +43,7 @@ if (isProduction) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Lastiğim Gitti server running on port ${PORT}`);
+const HOST = '0.0.0.0';
+app.listen(Number(PORT), HOST, () => {
+  console.log(`Lastiğim Gitti server running on ${HOST}:${PORT}`);
 });
