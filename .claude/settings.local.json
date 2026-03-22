@@ -8,5 +8,18 @@
       "Bash(curl -sL https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_macOS_arm64.zip -o /tmp/gh.zip)",
       "Bash(unzip -o /tmp/gh.zip -d /tmp/gh)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"suppressOutput\": true}'"
+          }
+        ]
+      }
+    ]
   }
 }

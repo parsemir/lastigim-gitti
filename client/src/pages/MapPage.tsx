@@ -6,9 +6,8 @@ import { Report } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import MapMarkers from '../components/MapMarkers';
 
-// Buca, Izmir center coordinates
-const BUCA_CENTER: [number, number] = [38.3888, 27.1750];
-const DEFAULT_ZOOM = 14;
+const BUCA_CENTER: [number, number] = [38.4192, 27.1287];
+const DEFAULT_ZOOM = 13;
 
 function LocationButton() {
   const map = useMap();
@@ -21,11 +20,11 @@ function LocationButton() {
   return (
     <button
       onClick={handleLocate}
-      className="absolute bottom-24 right-4 z-[1000] bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 transition"
+      className="absolute bottom-28 right-4 z-[1000] bg-white p-3 rounded-2xl shadow-lg shadow-gray-200/50 hover:shadow-xl hover:bg-gray-50 transition-all duration-200 active:scale-95 group"
       title={t('myLocation')}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary-600 group-hover:text-primary-700" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
       </svg>
     </button>
   );
@@ -100,6 +99,14 @@ export default function MapPage() {
     FIXED: () => t('statusFixed'),
   };
 
+  const filterColors: Record<string, string> = {
+    ALL: 'bg-gray-800 text-white',
+    REPORTED: 'bg-red-500 text-white',
+    UNDER_REVIEW: 'bg-yellow-500 text-white',
+    SCHEDULED: 'bg-blue-500 text-white',
+    FIXED: 'bg-green-500 text-white',
+  };
+
   const legendItems = [
     { color: '#ef4444', labelKey: 'statusReported' as const },
     { color: '#eab308', labelKey: 'statusUnderReview' as const },
@@ -110,20 +117,22 @@ export default function MapPage() {
   return (
     <div className="relative h-full">
       {/* Status filter bar */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex gap-1 bg-white rounded-full shadow-lg px-2 py-1">
-        {Object.keys(filterLabels).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-              statusFilter === s
-                ? 'bg-primary-600 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            {filterLabels[s]()}
-          </button>
-        ))}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] animate-slide-down">
+        <div className="glass rounded-2xl shadow-lg shadow-gray-200/30 px-2 py-1.5 flex gap-1">
+          {Object.keys(filterLabels).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                statusFilter === s
+                  ? filterColors[s] + ' shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {filterLabels[s]()}
+            </button>
+          ))}
+        </div>
       </div>
 
       <MapContainer center={BUCA_CENTER} zoom={DEFAULT_ZOOM} className="h-full w-full">
@@ -138,25 +147,33 @@ export default function MapPage() {
       {/* FAB - Report Pothole */}
       <button
         onClick={() => navigate('/report')}
-        className="absolute bottom-6 right-4 z-[1000] bg-accent-500 hover:bg-accent-600 text-white px-5 py-3 rounded-full shadow-xl font-semibold flex items-center gap-2 transition transform hover:scale-105"
+        className="absolute bottom-8 right-4 z-[1000] bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-600 text-white px-6 py-4 rounded-2xl shadow-xl shadow-accent-500/30 font-bold flex items-center gap-2.5 transition-all duration-200 hover:shadow-2xl hover:shadow-accent-500/40 active:scale-95 animate-fade-in-up"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
+        <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
         {t('reportPothole')}
       </button>
 
       {/* Legend */}
-      <div className="absolute bottom-6 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3">
-        <p className="text-xs font-semibold text-gray-600 mb-1">{t('status')}</p>
-        <div className="space-y-1">
+      <div className="absolute bottom-8 left-4 z-[1000] glass rounded-2xl shadow-lg shadow-gray-200/30 p-4 animate-fade-in-up">
+        <p className="text-xs font-bold text-gray-600 mb-2 uppercase tracking-wider">{t('status')}</p>
+        <div className="space-y-1.5">
           {legendItems.map((item) => (
-            <div key={item.labelKey} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ background: item.color }} />
-              <span className="text-xs text-gray-600">{t(item.labelKey)}</span>
+            <div key={item.labelKey} className="flex items-center gap-2.5">
+              <div className="w-3 h-3 rounded-full shadow-sm" style={{ background: item.color }} />
+              <span className="text-xs text-gray-600 font-medium">{t(item.labelKey)}</span>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Report count badge */}
+      <div className="absolute top-4 right-4 z-[1000] glass rounded-xl shadow-md px-3 py-2 animate-fade-in">
+        <span className="text-xs font-bold text-gray-700">{reports.length}</span>
+        <span className="text-xs text-gray-500 ml-1">{t('reports')}</span>
       </div>
     </div>
   );
